@@ -1,22 +1,86 @@
 
 #include "includes/cub3d.h"
-#include "includes/get_next_line.h"
 
-void    pixling_player(t_var *var, t_data d);
-int key_hook(int keycode, t_var *var)
+
+
+// void render_line(t_var *var)
+// {
+//     int i = 0;
+
+//     while ((var->player_y * GRID) - i > 0)
+//     {
+//         if (var->map[(int)(((var->player_y * GRID) - i) / GRID)][(int)var->player_x] == '1')
+//             break;
+//         my_mlx_pixel_put(var->d, var->player_x * GRID, (var->player_y * GRID) - i, 16711890);
+//         i++;
+//     }
+// }
+
+void draw_rays(t_var *var)
 {
-    if (keycode == 97)
+//     // var->angle = 0;
+//     int i = 0;
+// while (i < 60)
+// {
+
+        double new_x = var->player_x * GRID;
+        double new_y = var->player_y * GRID;
+        while ((new_x >= 0 && new_x < (var->row_n * GRID)) && (new_y >= 0 && new_y < (var->column_n * GRID)))
+        {
+            if (var->map[(int)(new_y / GRID)][(int)(new_x/ GRID)] == '1')
+                break;
+            my_mlx_pixel_put(var->d, new_x, new_y, 5375);
+
+            new_x += cos(var->angle);
+            new_y += sin(var->angle);
+        }
+//         var->angle += (PI / 180);
+//         i++;
+// }
+}
+
+
+int check_territory(t_var *var, double i, double j, int op)
+{
+    if (op == 1)
     {
-        var->player_x -= 10;
-        pixling_player(var, var->dd); 
+        var->check_x = (int)(var->player_x + j);
+        var->check_y = (int)(var->player_y + i);
+        if (var->map[var->check_y][var->check_x] == '1')
+            return 1;
+        return 0;
     }
-    else if (keycode == 98)
-       var->player_x += 10;
-    else if (keycode == 99) 
-        var->player_y -= 10;
-    else if (keycode == 100) 
-        var->player_y += 10;
-    return (0);
+    else
+    {
+        var->check_x = (int)(var->player_x - j);
+        var->check_y = (int)(var->player_y - i);
+        if (var->map[var->check_y][var->check_x] == '1')
+            return 1;
+        return 0;
+    }
+}
+
+
+void    move_stop(t_var *var)
+{
+    if (var->player_mv == 97)
+        if (!check_territory(var, 0, MOV, -1))
+        {
+            var->player_x += MOV + cos(var->angle + PI / 2);
+            var->player_y += MOV - sin(var->angle + PI / 2);
+        }
+    if (var->player_mv == 100)
+        if (!check_territory(var, 0, MOV, 1))
+        {
+            var->player_x +=(MOV);
+            // var->player_y += cos(var->angle);
+        }
+    if (var->player_mv == 119)
+        if (!check_territory(var, MOV, 0, -1))
+            var->player_y -= (MOV);
+    if (var->player_mv == 115)
+        if (!check_territory(var, MOV, 0, 1))
+            var->player_y +=(MOV);
 }
 
 void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
@@ -27,110 +91,12 @@ void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
 	*(unsigned int*)dst = color;
 }
 
-void    player_pos(t_var *var)
-{
-    int i = 0;
-    int j;
-
-    while (var->map[i])
-    {
-        j = 0;
-        while (var->map[i][j])
-        {
-            if (var->map[i][j] == 'N' || var->map[i][j] == 'E')
-            {
-                var->player_x = j;
-                var->player_y = i;
-                return;
-            }
-            j++;
-        }
-        i++;
-    }
-}
-void    pixling_player(t_var *var, t_data d)
-{
-    int i = 0;
-    int j;
-    player_pos(var);
-    // printf("var->x |%d| var->y |%d|\n", var->player_x, var->player_y);
-    while (i < 10) 
-    {
-        j = 0;
-        while ( j < 10)
-        {
-            my_mlx_pixel_put(&d, var->player_x * var->w_map + j, var->player_y * var->h_map + i, 167168100);
-            j++;
-        }
-        i++;
-    }
-}
-
-void    wh_ofmap(t_var *var)
-{
-    var->h_n = 0;
-    var->w_n = 0;
-    while (var->map[var->h_n][var->w_n])
-        var->w_n++;
-    var->w_map = W_SCREEN / var->w_n;
-    while (var->map[var->h_n])
-        var->h_n++;
-    var->h_map = H_SCREEN / var->h_n;
-}
-
-void pixling_sqr(t_var *var, int i, int j, int color, t_data d)
-{
-    int index = 0;
-    int jindex = 0;
-    int x_start = j * var->w_map;
-    int y_start = i * var->h_map;
-    
-    while (index < var->h_map - 1)
-    {
-        jindex = 0;
-        while (jindex < var->w_map - 1)
-        {
-            if (jindex == 0 || i == 0)
-                my_mlx_pixel_put(&d, x_start + jindex , y_start + index, color);
-            else
-            {
-                my_mlx_pixel_put(&d, x_start + jindex, (y_start + index) -1, color);
-            }
-            jindex++;
-        }
-        index++;
-    }
-}
-
-void map_towd(t_var *var, t_data d)
-{
-    int i = 0;
-    int j = 0;
-    wh_ofmap(var);
-    while (i < var->h_n)
-    {
-        j = 0;
-        while (j < var->w_n)
-        {
-            if (var->map[i][j] == '0')
-            {
-                pixling_sqr(var, i, j, 16777215, d);
-            }
-            else
-                 pixling_sqr(var, i, j, 0, d);
-            j++;
-        }
-        i++;
-    }
-}
 
 int main(int ac, char **av)
 {
     int fd;
-    void *mlx;
-    void  *mlx_win;
-    t_data d;
     t_var *var;
+    t_mlx   *ref;
 
 
 	if (ac > 2 || ac == 1)
@@ -138,22 +104,36 @@ int main(int ac, char **av)
 	else if (ac == 2)
     {
         var = malloc(sizeof(t_var));
+        var->d = malloc(sizeof(t_data));
+        ref = malloc(sizeof(t_mlx));
+        var->ref = ref;
         //must be freed
         ft_check(av[1]);
         fd = open(av[1], O_RDONLY);
         parce_check(fd, var);
-        mlx = mlx_init();
-        mlx_win = mlx_new_window(mlx, H_SCREEN, W_SCREEN, "MOKA3AB");
-        d.img = mlx_new_image(mlx, H_SCREEN, W_SCREEN);
-        d.addr = mlx_get_data_addr(d.img, &d.bits_per_pixel, &d.line_length,
-                            &d.endian);
-        map_towd(var, d);
-        pixling_player(var, d);
-        mlx_hook(mlx_win, 02, 1, key_hook, NULL);
-        mlx_put_image_to_window(mlx, mlx_win, d.img, 0, 0);
-        mlx_loop(mlx);
-    }
+        ref->mlx = mlx_init();
+        ref->mlx_win = mlx_new_window(ref->mlx, H_SCREEN, W_SCREEN, "MOKA3AB");
+        while (1)
+        {
+            var->d->img = mlx_new_image(ref->mlx, H_SCREEN, W_SCREEN);
+            var->d->addr = mlx_get_data_addr(var->d->img, &var->d->bits_per_pixel, &var->d->line_length,
+                                &var->d->endian);
+
+            player_pos(var);
+            map_towd(var);
+            pixling_player(var);
+            // render_line(var);
+            draw_rays(var);
+            mlx_hook(ref->mlx_win, 02, 1L<<0, ft_esc, ref);
+            mlx_hook(ref->mlx_win, 17, 0, ft_close, ref);
+            mlx_hook(ref->mlx_win, 02, 1L<<0, key_hook_mov, var);
+            mlx_hook(ref->mlx_win, 03, 1L<<0, key_hook_dir, var);
+            mlx_put_image_to_window(ref->mlx, ref->mlx_win, var->d->img, 0, 0);
+            mlx_loop(ref->mlx);
+
+        }
 
 
+        }
 }
 

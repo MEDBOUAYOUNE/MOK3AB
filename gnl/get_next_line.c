@@ -1,6 +1,6 @@
 
 
-#include "includes/get_next_line.h"
+#include "get_next_line.h"
 
 char	*ft_rest(char *rst)
 {

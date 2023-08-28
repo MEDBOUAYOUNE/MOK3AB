@@ -1,6 +1,6 @@
 
 
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
 
 static void	free_func(char **splited, int j)
 {

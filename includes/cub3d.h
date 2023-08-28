@@ -20,10 +20,16 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <limits.h>
-#include "get_next_line.h"
+#include <math.h>
+#include "../gnl/get_next_line.h"
 
-#define H_SCREEN 800
-#define W_SCREEN 800
+#define H_SCREEN 1080
+#define W_SCREEN 1080
+#define PI	3.14159265
+#define GRID 50
+#define MOV	0.05
+#define DIR  0.1
+#define RED_PLAYER 7
 
 typedef struct  s_rgb
 {
@@ -39,25 +45,52 @@ typedef struct	s_data {
 	int		endian;
 }				t_data;
 
+typedef struct s_mlx
+{
+	void	*mlx;
+	void	*mlx_win;
+}	t_mlx;
+
 typedef struct s_var
 {
 	char **map;
-	double	h_map;
-	double w_map;
-	int h_n;
-	int	w_n;
-	int player_x;
-	int	player_y;
-	t_data dd;
+	int row_n;
+	int	column_n;
+	double player_x;
+	double	player_y;
+	double angle;
+	int player_mv;
+	int check_x;
+	int check_y;
+	t_data *d;
+	t_mlx	*ref;
 }	t_var;
 
 
-//ray
-void    parce_check(int fd, t_var *var);
 
+//ray
+void map_towd(t_var *var);
+void pixling_sqr(t_var *var, int i, int j, int color);
+void    wh_ofmap(t_var *var);
+void    pixling_player(t_var *var);
+void    player_pos(t_var *var);
+void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
+void    move_stop(t_var *var);
+
+
+//test
+ void           draw_rays(t_var *var);
+ void           render_line(t_var *var);
+
+
+int key_hook_dir(int keycode, t_var *var);
+int key_hook_mov(int keycode, t_var *var);
+int ft_close(t_mlx *ref);
+int    ft_esc(int keycode, t_mlx *ref);
 
 // parse
 
+void    parce_check(int fd, t_var *var);
 int	ft_strcmp(const char *s1, const char *s2);
 size_t	ft_strlen(const	char *s);
 void	ft_putstr(char *s);

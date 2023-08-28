@@ -9,8 +9,7 @@
 /*   Updated: 2023/07/20 17:34:22 by aaouassa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include "includes/cub3d.h"
+#include "get_next_line.h"
 
 int	ft_strcmp(const char *s1, const char *s2)
 {

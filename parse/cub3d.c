@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/cub3d.h"
-#include "includes/get_next_line.h"
+#include "../includes/cub3d.h"
 
 void    parce_check(int fd, t_var *var)
 {
